@@ -85,6 +85,14 @@ const encodePayload = async (req, res) => {
   try {
     const { name, email, role } = req.body;
 
+    // Check if the required fields are provided
+    if (!name || !email || !role) {
+      return res.status(400).json({
+        message: 'Name, email, and role are required fields',
+        status: 'Error',
+      });
+    }
+
     // Create a payload
     const payload = {
       name,
@@ -92,6 +100,23 @@ const encodePayload = async (req, res) => {
       role,
     };
 
+    // Sign the payload and generate a JWT token
+    const token = jwt.sign(payload, JWT_SECRET);
+
+    // Return the token with success status
+    res.status(200).json({
+      token,
+      status: 'Success',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: 'Something went wrong',
+      status: 'Error',
+      error: err,
+    });
+  }
+};
     // Sign the payload and generate a JWT token
     const token = jwt.sign(payload, JWT_SECRET);
 
@@ -127,6 +152,7 @@ const decodeToken = (req, res) => {
     res.status(401).json({ message: 'Invalid token' });
   }
 };
+router.post('/api/v1/token/encode', encodePayload);
 
-module.exports = { encodePayload, decodeToken };
+module.exports = { encodePayload, decodeToken, router };
 
